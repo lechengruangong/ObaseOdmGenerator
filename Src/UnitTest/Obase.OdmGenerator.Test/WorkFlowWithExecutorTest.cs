@@ -1,5 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,8 +37,11 @@ public class WorkFlowWithExecutorTest
         var analyzer = DomainInfoAnalyzerFactory.CreateAnalyzer(path, ELanguage.CSharp);
         var infos = analyzer.Analyze();
 
-        //日志工厂
-        var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+        //日志工厂（基于文件的日志，输出到输出目录下的logs文件夹，按天滚动）
+        var logDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+        var loggerFactory = LoggerFactory.Create(builder =>
+            builder.AddFile(Path.Combine(logDirectory, "agents-{Date}.log"), minimumLevel:LogLevel.Trace,
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}"));
 
         //各个执行器
         var exactExecutor = new DomainClassInfoExactExecutor(infos, configuration);
