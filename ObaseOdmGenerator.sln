@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTest", "UnitTest", "{B4
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obase.OdmGenerator.Test", "Src\UnitTest\Obase.OdmGenerator.Test\Obase.OdmGenerator.Test.csproj", "{3019E436-7718-417F-9BD8-3A1B7969B3B8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Obase.OdmGenerator.WorkFlow", "Src\OdmGenerator\Obase.OdmGenerator.WorkFlow\Obase.OdmGenerator.WorkFlow.csproj", "{EDE8B99F-DB67-49AB-93B0-0486A6B752B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,10 @@ Global
 		{3019E436-7718-417F-9BD8-3A1B7969B3B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3019E436-7718-417F-9BD8-3A1B7969B3B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3019E436-7718-417F-9BD8-3A1B7969B3B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EDE8B99F-DB67-49AB-93B0-0486A6B752B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDE8B99F-DB67-49AB-93B0-0486A6B752B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDE8B99F-DB67-49AB-93B0-0486A6B752B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDE8B99F-DB67-49AB-93B0-0486A6B752B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -32,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F99B1677-0095-451C-A704-9A5EFB1A1FF0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{3019E436-7718-417F-9BD8-3A1B7969B3B8} = {B4412325-FF46-4A87-82D6-C1E0A81A48E0}
+		{EDE8B99F-DB67-49AB-93B0-0486A6B752B8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F03B00DD-4C46-46AD-AA2A-20C98346CF3B}

@@ -34,9 +34,9 @@ public class ObjectDataModelGenerateAgent : BaseDomainClassInfoProcessAgent
     public ObjectDataModelGenerateAgent(List<DomainClassInfo> domainClassInfos, IApikeyConfiguration config,
         ELanguage language, string entityRule = null, string explicitlyRule = null,
         string implicitRule = null, string output = null, AITool[] tools = null, bool useJsonOutput = true) : base(
-        domainClassInfos, config, "你是一个Obase的ODM模型配置生成器,根据传入的领域类信息生成对应的ODM基础配置代码.",
+        domainClassInfos, config, "你是一个Obase的ODM模型配置生成器,根据传入的领域类信息生成对应的ODM基础配置.",
         new ObjectDataModelGenerateRule(language, entityRule, explicitlyRule, implicitRule).ToString(),
-        "使用查询领域类信息,根据属性名称查询属性的注释等工具来获取领域类的信息,并根据领域类的属性和引用关系来生成对应的ODM基础配置代码.", output, tools, useJsonOutput)
+        "使用查询领域类信息,根据属性名称查询属性的注释等工具来获取领域类的信息,并根据领域类的属性和引用关系来生成对应的ODM基础配置.", output, tools, useJsonOutput)
     {
     }
 }

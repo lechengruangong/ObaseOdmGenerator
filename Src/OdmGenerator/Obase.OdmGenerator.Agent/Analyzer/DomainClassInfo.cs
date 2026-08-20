@@ -27,12 +27,12 @@ public class DomainClassInfo
     ///     引用的其他类型列表
     ///     仅包含属性类型 类型仅限于当前领域内 不包括系统类型
     /// </summary>
-    public List<Tuple<string, string>> ReferencedTypes { get; set; } = new();
+    public List<Tuple<string, string>> ReferencedTypes { get; set; } = [];
 
     /// <summary>
     ///     类的属性列表，每个属性包含类型和名称
     /// </summary>
-    public List<Tuple<string, string>> PropertyList { get; set; } = new();
+    public List<Tuple<string, string>> PropertyList { get; set; } = [];
 
     /// <summary>
     ///     类的属性注释字典，键为属性名称，值为属性注释

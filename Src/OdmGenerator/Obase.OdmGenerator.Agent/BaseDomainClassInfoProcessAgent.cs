@@ -42,6 +42,11 @@ public abstract class BaseDomainClassInfoProcessAgent
     private AIAgent _agent;
 
     /// <summary>
+    ///     代理建造器
+    /// </summary>
+    private readonly AIAgentBuilder _builder;
+
+    /// <summary>
     ///     初始化基于领域类信息进行处理的代理基类
     /// </summary>
     /// <param name="domainClassInfos">领域类信息集合</param>
@@ -61,6 +66,10 @@ public abstract class BaseDomainClassInfoProcessAgent
 
         if (config == null)
             throw new ArgumentNullException(nameof(config), "LLM配置不可为空.");
+
+        if (string.IsNullOrEmpty(config.Endpoint) || string.IsNullOrEmpty(config.ModelId) ||
+            string.IsNullOrEmpty(config.ApiKey))
+            throw new ArgumentException("LLM配置的Endpoint,ModelId,ApiKey均不可为空.");
 
         //域类信息
         _domainClassInfos = domainClassInfos;
@@ -104,7 +113,7 @@ public abstract class BaseDomainClassInfoProcessAgent
             toolList.AddRange(tools);
 
         //构造一个建造器 综合使用RAG和MCP工具来判断领域类的领域类型
-        Builder = openAiClient.GetChatClient(config.ModelId).AsAIAgent(new ChatClientAgentOptions
+        _builder = openAiClient.GetChatClient(config.ModelId).AsAIAgent(new ChatClientAgentOptions
         {
             ChatOptions = new ChatOptions
             {
@@ -118,7 +127,7 @@ public abstract class BaseDomainClassInfoProcessAgent
         }).AsBuilder();
 
         //向建造器重增加查询领域类信息的RAG
-        Builder.UseAIContextProviders(new TextSearchProvider(SearchDomainClassInfoAsync, new TextSearchProviderOptions
+        _builder.UseAIContextProviders(new TextSearchProvider(SearchDomainClassInfoAsync, new TextSearchProviderOptions
         {
             //SearchAsync为RAG的具体提供者
             SearchTime = TextSearchProviderOptions.TextSearchBehavior.BeforeAIInvoke,
@@ -128,14 +137,9 @@ public abstract class BaseDomainClassInfoProcessAgent
     }
 
     /// <summary>
-    ///     代理建造器
-    /// </summary>
-    protected AIAgentBuilder Builder { get; }
-
-    /// <summary>
     ///     代理
     /// </summary>
-    private AIAgent Agent => _agent ??= Builder.Build();
+    private AIAgent Agent => _agent ??= _builder.Build();
 
     /// <summary>
     ///     领域类信息查询RAG工具:根据查询文本查询领域类信息集合
@@ -151,16 +155,16 @@ public abstract class BaseDomainClassInfoProcessAgent
         foreach (var item in _domainClassInfos)
         {
             var refs = item.ReferencedTypes.Count > 0
-                ? string.Join(", ", item.ReferencedTypes.Select(p => $"属性类型:{p.Item1},属性名称:{p.Item2}"))
+                ? string.Join(". ", item.ReferencedTypes.Select(p => $"属性类型:{p.Item1},属性名称:{p.Item2}"))
                 : "没有";
             var props = item.PropertyList.Count > 0
-                ? string.Join(", ", item.PropertyList.Select(p => $"属性类型:{p.Item1},属性名称:{p.Item2}"))
+                ? string.Join(". ", item.PropertyList.Select(p => $"属性类型:{p.Item1},属性名称:{p.Item2}"))
                 : "没有";
 
             results.Add(new TextSearchProvider.TextSearchResult
             {
                 SourceName = "域类信息集合",
-                Text = $"类名:{item.ClassName},引用的其他领域类型列表:[{string.Join(",", refs)}],自身属性列表:[{string.Join(",", props)}]."
+                Text = $"类名:{item.ClassName},引用的其他领域类型列表:[{string.Join(" ", refs)}],自身属性列表:[{string.Join(" ", props)}]."
             });
         }
 
@@ -221,7 +225,7 @@ public abstract class BaseDomainClassInfoProcessAgent
         Func<IEnumerable<ChatMessage>, AgentSession, AgentRunOptions, AIAgent, CancellationToken,
             IAsyncEnumerable<AgentResponseUpdate>> runStreamingFunc)
     {
-        Builder.Use(runFunc, runStreamingFunc);
+        _builder.Use(runFunc, runStreamingFunc);
         return this;
     }
 
@@ -234,7 +238,7 @@ public abstract class BaseDomainClassInfoProcessAgent
         Func<AIAgent, FunctionInvocationContext, Func<FunctionInvocationContext, CancellationToken, ValueTask<object>>,
             CancellationToken, ValueTask<object>> callback)
     {
-        Builder.Use(callback);
+        _builder.Use(callback);
         return this;
     }
 
@@ -247,7 +251,7 @@ public abstract class BaseDomainClassInfoProcessAgent
     public BaseDomainClassInfoProcessAgent UseLogging(ILoggerFactory loggerFactory,
         Action<LoggingAgent> configure = null)
     {
-        Builder.UseLogging(loggerFactory, configure);
+        _builder.UseLogging(loggerFactory, configure);
         return this;
     }
 }

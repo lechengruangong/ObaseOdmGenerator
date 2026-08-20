@@ -1,0 +1,8 @@
+﻿{
+  //以下三项为基于API KEY的LLM配置
+  "ApiKey": "",
+  "Endpoint": "",
+  "ModelId": "",
+  //以下一项为要处理的领域类所在的文件夹
+  "DomainClassDir": ""
+}

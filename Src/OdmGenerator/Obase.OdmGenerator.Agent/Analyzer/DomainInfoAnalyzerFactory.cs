@@ -8,6 +8,7 @@
 */
 
 using System;
+using System.IO;
 
 namespace Obase.OdmGenerator.Agent.Analyzer;
 
@@ -24,6 +25,12 @@ public static class DomainInfoAnalyzerFactory
     /// <returns>领域信息提取器</returns>
     public static IDomainInfoAnalyzer CreateAnalyzer(string codePath, ELanguage language)
     {
+        if (string.IsNullOrEmpty(codePath))
+            throw new ArgumentNullException(nameof(codePath), "领域类所在的目录不可为空.");
+
+        if (!new DirectoryInfo(codePath).Exists)
+            throw new ArgumentException($"{codePath}目录不存在,无法读取领域类代码文件.");
+
         return language switch
         {
             ELanguage.CSharp => new DotNetDomainInfoAnalyzer(codePath),
