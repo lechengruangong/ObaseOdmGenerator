@@ -1,0 +1,38 @@
+<Project>
+  <PropertyGroup>
+    <!-- 统一配置包版本 -->
+    <PackageVersion>1.0.0</PackageVersion>
+    <!-- 统一配置输出路径 -->
+    <OutputPath>../Output/</OutputPath>
+    <!-- 统一配置目标框架 -->
+    <TargetFramework>net9.0</TargetFramework>
+    <!-- 一些版权信息和协议 -->
+    <Company>武汉乐程软工科技有限公司</Company>
+    <Authors>Obase项目组</Authors>
+    <Copyright>CopyRight © 武汉乐程软工科技有限公司</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <!-- 仓库URL -->
+    <RepositoryUrl>https://github.com/lechengruangong/ObaseOdmGenerator</RepositoryUrl>
+    <!-- 修改日志 -->
+    <PackageReleaseNotes>https://github.com/lechengruangong/ObaseOdmGenerator/releases</PackageReleaseNotes>
+    <!-- 生成注释文件 -->
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <!-- 加入符号包/符号包格式 -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- 发布仓库URL -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- 启用确定性构建 -->
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <!-- 跟踪build生成的代码文件 -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- 启用源链接 -->
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
