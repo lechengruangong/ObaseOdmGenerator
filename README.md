@@ -3,7 +3,7 @@ Obase 的 ODM 配置生成器，本生成器借助 LLM 完成 Obase 对象数据
 
 ## 已有功能
 
-- 读取以 C# 语言编写的领域类，生成领域类的引用关系与自身属性。
+- 读取以 C# 语言编写的领域类，生成领域类的引用关系、自身属性以及类与属性上的注释。
 - 根据领域类的引用关系与自身属性，判断其应归属的对象数据模型具体类型。
 - 生成 .NET 平台下 Obase 对象数据模型的基础配置。
 
@@ -86,7 +86,15 @@ await foreach (var evt in run.WatchStreamAsync())
 ### 自定义执行器
 
 - 通过 ObjectDataModelGenerateWorkFlowBuilder.GetDefaultWorkflowBuilder 方法获取的工作流建造器，其使用的执行器均由默认构造函数初始化。若希望沿用默认的工作流排布、同时自定义某些属性，可以使用 ObjectDataModelGenerateWorkFlowBuilder.GetWorkFlowWithExecutor 传入自定义参数构造的执行器，来获取保持默认排布的工作流建造器。
+- GetWorkFlowWithExecutor 的各个执行器参数均可省略，省略时使用默认构造的执行器，因此只需要传入确实想要自定义的那部分执行器即可。由于默认执行器需要依赖领域信息与 LLM，省略执行器时必须同时传入领域类信息列表（domainClassInfos）、编程语言（language）与 LLM 配置（configuration），其中领域类信息列表与 LLM 配置不可为空，为空时会抛出 ArgumentNullException。
 - 执行器 DomainClassInfoExactExecutor、DomainClassInfoReviewExecutor、ObjectDataModelGenerateExecutor、ObjectDataModelReviewExecutor 均提供 Agent 属性访问器，可在构造后使用该访问器的 Use、UseLogging 方法注册中间件与日志工厂，以协助调试。
+
+### 自定义配置规则与审核规则
+
+- 领域信息抽取执行器 DomainClassInfoExactExecutor 与领域信息审核执行器 DomainClassInfoReviewExecutor 可传入 knowledge 参数，用于补充「如何确定领域类型」的知识。
+- ObjectDataModelGenerateExecutor 与 ObjectDataModelReviewExecutor 均可传入实体型（entityRule）、显式关联型（explicitlyRule）、隐式关联型（implicitRule）三种类型的配置规则，不指定时使用内置的默认规则。
+- ObjectDataModelReviewExecutor 还可传入审核要求（reviewRule），用于自定义审核时所依据的规则。不指定时使用默认的审核要求，该默认审核要求由两部分组成：一是配置生成的规则（不含「当用户要求生成……」这一段前言），二是内置的 ODM 配置审核检查项，检查项覆盖数量与类型、实体型、显式关联型、隐式关联型以及通用检查等方面。
+- 自定义审核要求时建议同时给出配置规则与检查项：配置规则说明「应当生成什么」，检查项说明「如何判定是否符合要求」，否则审核器可能因缺少判定依据而给出不准确的结论。若只希望调整判定标准、而沿用默认的配置规则，则需要在自定义审核要求中自行复述相应的配置规则。
 
 ### 自定义工作流
 
