@@ -157,4 +157,54 @@ public static class DefaultPrompts
         implicitlyRuleBuilder.AppendLine("隐式关联型的配置规则和步骤如下:");
         throw new NotImplementedException();
     }
+
+    /// <summary>
+    ///     获取默认的ODM配置审核检查项
+    /// </summary>
+    /// <returns>默认的ODM配置审核检查项</returns>
+    public static string GetDefaultOdmReviewCheckItem()
+    {
+        var checkItemBuilder = new StringBuilder();
+        checkItemBuilder.AppendLine("请审核传入的ODM基础配置代码是否与领域信息相符,并逐项按照以下检查项进行检查,只要存在任何一项不符合要求,就应当判定为不相符:");
+        checkItemBuilder.AppendLine("1. 数量与类型检查:配置的类型与数量是否与领域类型分析结果完全一致,是否有遗漏的类型,是否有分析结果中不存在的多余类型.");
+        checkItemBuilder.AppendLine("2. 实体型检查,对每一个实体型应当检查以下各项:");
+        checkItemBuilder.AppendLine(
+            "   1) 是否通过modelBuilder的Entity<>()函数生成此实体型的配置对象,且未对同一个实体型重复声明配置变量;");
+        checkItemBuilder.AppendLine(
+            "   2) 主键是否与分析结果中此实体型的主键完全一致,是否遗漏了任何一个主键,是否多配置了不属于主键的属性;");
+        checkItemBuilder.AppendLine(
+            "   3) 主键自增的配置是否符合规则,即是否只对单个int,short,long类型的主键配置了自增,是否有联合主键被配置为自增;");
+        checkItemBuilder.AppendLine("   4) ToTable()函数的映射表是否正确,当映射表名称即为类型名称时是否使用了nameof()的形式.");
+        checkItemBuilder.AppendLine("3. 显式关联型检查,对每一个显式关联型应当检查以下各项:");
+        checkItemBuilder.AppendLine(
+            "   1) 是否通过modelBuilder的Association<>()函数生成此显式关联型的配置对象,且未对同一个显式关联型重复声明配置变量;");
+        checkItemBuilder.AppendLine(
+            "   2) 是否为此显式关联型内引用的每一个实体型都配置了关联端,关联端的类型与个数是否与分析结果一致,是否遗漏了任何一个关联端;");
+        checkItemBuilder.AppendLine(
+            "   3) 每个关联端的每个主键是否都配置了HasMapping(),是否有多主键实体型的关联端只配置了部分主键的映射;");
+        checkItemBuilder.AppendLine(
+            "   4) HasMapping()函数的两个参数是否均使用了真实存在的属性名称,是否编造了不存在的字段名称;");
+        checkItemBuilder.AppendLine("   5) ToTable()函数的映射表是否正确,当映射表名称即为类型名称时是否使用了nameof()的形式.");
+        checkItemBuilder.AppendLine("4. 隐式关联型检查,对每一条隐式关联型应当检查以下各项:");
+        checkItemBuilder.AppendLine(
+            "   1) 是否通过modelBuilder的Association()函数生成了新的配置器对象,是否有多个隐式关联共用一个配置器变量,是否有未生成配置的隐式关联;");
+        checkItemBuilder.AppendLine(
+            "   2) 是否为此隐式关联的两个参与类型都配置了关联端,关联端的类型名称是否与分析结果中的两个类型名称完全一致;");
+        checkItemBuilder.AppendLine(
+            "   3) 每个关联端的每个主键是否都配置了HasMapping(),是否有多主键实体型的关联端只配置了部分主键的映射;");
+        checkItemBuilder.AppendLine(
+            "   4) HasMapping()函数的两个参数是否均使用了真实存在的属性名称,是否编造了不存在的字段名称;");
+        checkItemBuilder.AppendLine("   5) 两个关联端上ToTable()函数配置的映射表名称是否相同,是否存在两个端配置到不同映射表的情况.");
+        checkItemBuilder.AppendLine("5. 通用检查,对所有的配置应当检查以下各项:");
+        checkItemBuilder.AppendLine("   1) 是否有多余的或重复的配置,是否对同一个类型重复生成了配置;");
+        checkItemBuilder.AppendLine(
+            "   2) 生成的代码在语法与所使用的Obase Api上是否正确,是否调用了正确的函数名称与参数类型;");
+        checkItemBuilder.AppendLine(
+            "   3) 是否存在取值为空字符串或null的HasMapping()或ToTable()参数,是否存在未填写的映射,存在则判定为不符合;");
+        checkItemBuilder.AppendLine(
+            "   4) Lambda表达式中使用的属性名称是否真实存在于对应的类中,是否使用了分析结果中不存在的属性,存在则判定为不符合.");
+        checkItemBuilder.AppendLine(
+            "6. 对于被判定为不符合的检查项,必须说明其所在的具体类型或具体关联,以及具体的修改建议,以便根据审核意见重新进行修正.");
+        return checkItemBuilder.ToString();
+    }
 }

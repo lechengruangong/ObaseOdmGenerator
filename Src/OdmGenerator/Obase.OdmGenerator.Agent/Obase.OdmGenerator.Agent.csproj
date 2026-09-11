@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -7,6 +7,10 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Agents.AI.OpenAI" Version="1.18.0" />
     <PackageReference Include="TreeSitter.DotNet" Version="1.3.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 向单元测试项目公开内部类型 以便对内部的规则与代理进行测试 -->
+    <InternalsVisibleTo Include="Obase.OdmGenerator.Test" />
   </ItemGroup>
   <ItemGroup>
     <None Update="README.md">
