@@ -70,7 +70,8 @@ public class WorkFlowWithExecutorTest
         //获取具体的建造器
         var workFlowBuilder =
             ObjectDataModelGenerateWorkFlowBuilder.GetWorkFlowWithExecutor(exactExecutor, exactReviewExecutor,
-                reExactExecutor, genExecutor, genReviewExecutor, reGenExecutor, outputExecutor);
+                reExactExecutor, genExecutor, genReviewExecutor, reGenExecutor, outputExecutor,
+                infos, ELanguage.CSharp, configuration);
 
         //建造工作流
         var workFlow = workFlowBuilder.Build();

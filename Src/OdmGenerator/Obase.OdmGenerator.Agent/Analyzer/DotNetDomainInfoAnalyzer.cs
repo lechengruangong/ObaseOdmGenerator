@@ -1,4 +1,4 @@
-﻿/*
+/*
 ┌──────────────────────────────────────────────────────────────┐
 │　描   述：C#代码的领域类信息分析器.
 │　作   者：Obase开发团队
@@ -51,6 +51,18 @@ public class DotNetDomainInfoAnalyzer : IDomainInfoAnalyzer
     }
 
     /// <summary>
+    ///     清理文档注释的行内容 去掉注释符号与summary标签 并去掉前后空格 只保留有内容的行
+    /// </summary>
+    /// <param name="commentLines">注释的原始行集合</param>
+    /// <returns>清理后的注释内容</returns>
+    private static string CleanSummaryComment(IEnumerable<string> commentLines)
+    {
+        return string.Join(Environment.NewLine, commentLines
+            .Select(line => line.Replace("///", "").Replace("<summary>", "").Replace("</summary>", "").Trim())
+            .Where(line => !string.IsNullOrEmpty(line)));
+    }
+
+    /// <summary>
     ///     分析代码文件，提取领域类信息
     /// </summary>
     /// <returns>领域类信息</returns>
@@ -82,10 +94,47 @@ public class DotNetDomainInfoAnalyzer : IDomainInfoAnalyzer
             //一个数组列表 每个数组有2个元素 分别是类名 类体
             var classGroupList = query.Execute(tree.RootNode).Captures.Chunk(2).ToList();
 
+            //查询类声明前的文档注释 某个类的注释一定在类声明节点之前 可能有数行 只取从/// <summary> 到 /// </summary> 的注释内容
+            //此处按类名作为键存储其注释 以避免没有注释的类导致注释与类错位
+            var classCommentQuery = new Query(tree.Language, @"
+                    (
+                       (comment)* @class.summary.lines
+                       .
+                       (class_declaration) @class-declaration
+                    )
+                ");
+            var classCommentList = classCommentQuery.Execute(tree.RootNode).Captures.ToList();
+
+            //类名与类注释的字典
+            var classCommentDict = new Dictionary<string, string>();
+
+            //记录当前类之前的注释与当前类声明节点 成对处理
+            var pendingCommentLines = new List<string>();
+            foreach (var capture in classCommentList)
+            {
+                if (capture.Name == "class.summary.lines")
+                {
+                    //注释节点 暂存
+                    pendingCommentLines.Add(capture.Node.Text);
+                    continue;
+                }
+
+                //类声明节点 取类名作为键
+                var declaredNameNode = capture.Node.Children.FirstOrDefault(n => n.Type == "identifier");
+                if (declaredNameNode != null)
+                    classCommentDict[declaredNameNode.Text] = CleanSummaryComment(pendingCommentLines);
+                //清空暂存的注释 继续处理下一个类
+                pendingCommentLines.Clear();
+            }
+
             foreach (var group in classGroupList)
             {
                 //取类名节点的文本 即类名
                 var className = group[0].Node.Text;
+
+                //取此类的注释
+                classCommentDict.TryGetValue(className, out var classComment);
+                classComment ??= string.Empty;
 
                 //继续查询类体节点 取其中的属性声明节点
                 query = new Query(tree.Language, @"
@@ -198,8 +247,7 @@ public class DotNetDomainInfoAnalyzer : IDomainInfoAnalyzer
                             if (prevCapture.Name == "summary.lines")
                             {
                                 //取出注释内容 去掉/// <summary> </summary> 并去掉前后空格
-                                var text = prevCapture.Node.Text.Replace("///", "").Replace("<summary>", "")
-                                    .Replace("</summary>", "").Trim();
+                                var text = CleanSummaryComment([prevCapture.Node.Text]);
                                 if (!string.IsNullOrEmpty(text))
                                     commentLines.Add(text);
                             }
@@ -222,6 +270,7 @@ public class DotNetDomainInfoAnalyzer : IDomainInfoAnalyzer
                 allClasses.Add(new DomainClassInfo
                 {
                     ClassName = className,
+                    ClassComment = classComment,
                     ReferencedTypes = referencedTypes,
                     PropertyList = propertyTypes,
                     PropertyComments = dict

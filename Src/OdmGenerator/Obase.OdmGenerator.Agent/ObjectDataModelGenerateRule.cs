@@ -1,4 +1,4 @@
-﻿/*
+/*
 ┌──────────────────────────────────────────────────────────────┐
 │　描   述：对象数据模型生成规则.
 │　作   者：Obase开发团队
@@ -19,6 +19,11 @@ namespace Obase.OdmGenerator.Agent;
 /// </summary>
 internal sealed class ObjectDataModelGenerateRule
 {
+    /// <summary>
+    ///     ODM配置生成规则的前言
+    /// </summary>
+    private const string RulePreamble = "当用户要求生成Obase的ODM基础配置时,请根据以下规则生成:";
+
     /// <summary>
     ///     实体型的配置规则
     /// </summary>
@@ -62,13 +67,15 @@ internal sealed class ObjectDataModelGenerateRule
     }
 
     /// <summary>
-    ///     转换为字符串
+    ///     组织三种类型的配置规则
     /// </summary>
-    /// <returns>字符串</returns>
-    public override string ToString()
+    /// <param name="withPreamble">是否附带配置生成规则的前言</param>
+    /// <returns>ODM配置生成规则</returns>
+    private string BuildGenerateRule(bool withPreamble)
     {
         var builder = new StringBuilder();
-        builder.AppendLine("当用户要求生成Obase的ODM基础配置时,请根据以下规则生成:");
+        //前言仅在生成配置时给出 审核配置时不需要
+        if (withPreamble) builder.AppendLine(RulePreamble);
         builder.AppendLine(
             "1. ODM的基础配置包括实体型、显式关联型和隐式关联型三种类型.分别对应规则entity-rule,explicitly-association-rule和implicit-association-rule.");
         builder.AppendLine("2. 需要读取具体的资源来获取配置规则后再根据具体的规则和步骤生成相应的配置.");
@@ -83,5 +90,23 @@ internal sealed class ObjectDataModelGenerateRule
         builder.AppendLine("## 规则implicit-association-rule");
         builder.AppendLine($"{_implicitRule}");
         return builder.ToString();
+    }
+
+    /// <summary>
+    ///     转换为字符串(仅包含配置生成的规则,不包含配置生成规则的前言)
+    /// </summary>
+    /// <returns>字符串</returns>
+    public string ToRuleString()
+    {
+        return BuildGenerateRule(false);
+    }
+
+    /// <summary>
+    ///     转换为字符串(配置生成规则)
+    /// </summary>
+    /// <returns>字符串</returns>
+    public override string ToString()
+    {
+        return BuildGenerateRule(true);
     }
 }

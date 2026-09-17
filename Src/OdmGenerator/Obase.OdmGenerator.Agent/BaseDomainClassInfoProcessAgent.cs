@@ -1,4 +1,4 @@
-﻿/*
+/*
 ┌──────────────────────────────────────────────────────────────┐
 │　描   述：基于领域类信息进行处理的代理基类.
 │　作   者：Obase开发团队
@@ -107,8 +107,9 @@ public abstract class BaseDomainClassInfoProcessAgent
             instructions.AppendLine(output);
         }
 
-        //默认的MCP工具 根据属性名称查询对应的注释工具 协助智能体更好地理解领域类的属性含义
-        var toolList = new List<AITool> { AIFunctionFactory.Create(GetPropertyComment) };
+        //默认的MCP工具 根据属性名称查询对应的注释工具 以及根据类名称查询类的注释的工具 协助智能体更好地理解领域类的含义
+        var toolList = new List<AITool>
+            { AIFunctionFactory.Create(GetPropertyComment), AIFunctionFactory.Create(GetClassComment) };
         if (tools?.Length > 0)
             toolList.AddRange(tools);
 
@@ -160,11 +161,13 @@ public abstract class BaseDomainClassInfoProcessAgent
             var props = item.PropertyList.Count > 0
                 ? string.Join(". ", item.PropertyList.Select(p => $"属性类型:{p.Item1},属性名称:{p.Item2}"))
                 : "没有";
+            var classComment = string.IsNullOrEmpty(item.ClassComment) ? "没有" : item.ClassComment;
 
             results.Add(new TextSearchProvider.TextSearchResult
             {
                 SourceName = "域类信息集合",
-                Text = $"类名:{item.ClassName},引用的其他领域类型列表:[{string.Join(" ", refs)}],自身属性列表:[{string.Join(" ", props)}]."
+                Text =
+                    $"类名:{item.ClassName},类的注释:{classComment},引用的其他领域类型列表:[{string.Join(" ", refs)}],自身属性列表:[{string.Join(" ", props)}]."
             });
         }
 
@@ -186,6 +189,20 @@ public abstract class BaseDomainClassInfoProcessAgent
             return "无此领域类型.";
         var prop = cla.PropertyComments.TryGetValue(propName, out var comment);
         return prop ? comment : "无此属性的注释.";
+    }
+
+    /// <summary>
+    ///     MCP工具:根据领域类名称查询类的注释
+    /// </summary>
+    /// <param name="className">领域类名称</param>
+    /// <returns>类的注释</returns>
+    [Description("根据领域类名称查询类的注释工具.")]
+    private string GetClassComment([Description("要查询的领域类名称.")] string className)
+    {
+        var cla = _domainClassInfos.FirstOrDefault(p => p.ClassName == className);
+        if (cla == null)
+            return "无此领域类型.";
+        return string.IsNullOrEmpty(cla.ClassComment) ? "无此类的注释." : cla.ClassComment;
     }
 
 

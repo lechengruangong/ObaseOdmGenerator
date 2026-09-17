@@ -1,4 +1,4 @@
-﻿/*
+/*
 ┌──────────────────────────────────────────────────────────────┐
 │　描   述：领域类信息，包括类名、引用的类型和文件路.
 │　作   者：Obase开发团队
@@ -22,6 +22,11 @@ public class DomainClassInfo
     ///     类名
     /// </summary>
     public string ClassName { get; init; }
+
+    /// <summary>
+    ///     类的注释，取类声明前的文档注释内容
+    /// </summary>
+    public string ClassComment { get; set; } = string.Empty;
 
     /// <summary>
     ///     引用的其他类型列表
@@ -54,6 +59,7 @@ public class DomainClassInfo
         var comments = PropertyComments.Count > 0
             ? string.Join(", ", PropertyComments.Select(p => $"{p.Key} {p.Value}"))
             : "None";
-        return $"{{ Class: {ClassName}, References: [{refs}], Properties: [{props}], PropertyComments: [{comments}] }}";
+        return
+            $"{{ Class: {ClassName}, ClassComment: {ClassComment}, References: [{refs}], Properties: [{props}], PropertyComments: [{comments}] }}";
     }
 }

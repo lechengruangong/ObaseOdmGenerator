@@ -41,10 +41,11 @@ public class
     /// <param name="explicitlyRule">显式关联型的配置规则</param>
     /// <param name="implicitRule">隐式关联型的配置规则</param>
     /// <param name="config">LLM配置</param>
+    /// <param name="reviewRule">审核要求,不指定时使用默认的审核要求</param>
     public ObjectDataModelReviewExecutor(List<DomainClassInfo> domainClassInfos, IApikeyConfiguration config,
         ELanguage language,
         string entityRule = null, string explicitlyRule = null,
-        string implicitRule = null) : base(nameof(ObjectDataModelReviewExecutor))
+        string implicitRule = null, string reviewRule = null) : base(nameof(ObjectDataModelReviewExecutor))
     {
         //组织提示词
         var output = new StringBuilder("输出格式为Json格式,以下为Json对象的格式:");
@@ -60,7 +61,7 @@ public class
         output.AppendLine("5. 最终输出必须是一个可以被标准Json解析器直接解析的Json对象,不需要任何额外的说明.");
         //创建领域类预处理器代理
         _agent = new ObjectDataModelReviewAgent(domainClassInfos, config, language,
-            entityRule, explicitlyRule, implicitRule, output.ToString());
+            entityRule, explicitlyRule, implicitRule, reviewRule, output.ToString());
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿/*
+/*
 ┌──────────────────────────────────────────────────────────────┐
 │　描   述：Obase的ODM模型生成工作流建造器.
 │　作   者：Obase开发团队
@@ -8,6 +8,8 @@
 */
 
 
+using System;
+using System.Collections.Generic;
 using Microsoft.Agents.AI.Workflows;
 using Obase.OdmGenerator.Agent.Analyzer;
 using Obase.OdmGenerator.Agent.Config;
@@ -47,42 +49,49 @@ public static class ObjectDataModelGenerateWorkFlowBuilder
         //抽取领域信息
         var infos = analyzer.Analyze();
 
-        //各个执行器
-        var exactExecutor = new DomainClassInfoExactExecutor(infos, configuration);
-
-        var exactReviewExecutor = new DomainClassInfoReviewExecutor(infos, configuration);
-
-        var reExactExecutor = new DomainClassInfoReExactExecutor();
-
-        var genExecutor = new ObjectDataModelGenerateExecutor(infos, configuration, language);
-
-        var genReviewExecutor = new ObjectDataModelReviewExecutor(infos, configuration, language);
-
-        var reGenExecutor = new ObjectDataModelReGenerateExecutor();
-
-        var outputExecutor = new OutputExecutor();
-        //默认排布
-        return GetWorkFlowWithExecutor(exactExecutor, exactReviewExecutor, reExactExecutor, genExecutor,
-            genReviewExecutor, reGenExecutor, outputExecutor);
+        //默认排布 执行器均不指定 使用默认构造的执行器
+        return GetWorkFlowWithExecutor(domainClassInfos: infos, language: language, configuration: configuration);
     }
 
     /// <summary>
     ///     使用自定义的执行器获取默认排布工作流建造器
     /// </summary>
-    /// <param name="exactExecutor">领域信息抽取执行器</param>
-    /// <param name="exactReviewExecutor">领域信息审核执行器</param>
-    /// <param name="reExactExecutor">领域信息再抽取执行器</param>
-    /// <param name="genExecutor">ODM生成执行器</param>
-    /// <param name="genReviewExecutor">ODM生成审核执行器</param>
-    /// <param name="reGenExecutor">ODM再生成执行器</param>
-    /// <param name="outputExecutor">输出执行器</param>
+    /// <param name="exactExecutor">领域信息抽取执行器,不指定时使用默认的执行器</param>
+    /// <param name="exactReviewExecutor">领域信息审核执行器,不指定时使用默认的执行器</param>
+    /// <param name="reExactExecutor">领域信息再抽取执行器,不指定时使用默认的执行器</param>
+    /// <param name="genExecutor">ODM生成执行器,不指定时使用默认的执行器</param>
+    /// <param name="genReviewExecutor">ODM生成审核执行器,不指定时使用默认的执行器</param>
+    /// <param name="reGenExecutor">ODM再生成执行器,不指定时使用默认的执行器</param>
+    /// <param name="outputExecutor">输出执行器,不指定时使用默认的执行器</param>
+    /// <param name="domainClassInfos">领域类信息,不指定的执行器需要使用此项构造默认的执行器</param>
+    /// <param name="language">编程语言,不指定的执行器需要使用此项构造默认的执行器</param>
+    /// <param name="configuration">LLM配置,不指定的执行器需要使用此项构造默认的执行器</param>
     /// <returns></returns>
-    public static WorkflowBuilder GetWorkFlowWithExecutor(DomainClassInfoExactExecutor exactExecutor,
-        DomainClassInfoReviewExecutor exactReviewExecutor,
-        DomainClassInfoReExactExecutor reExactExecutor, ObjectDataModelGenerateExecutor genExecutor,
-        ObjectDataModelReviewExecutor genReviewExecutor,
-        ObjectDataModelReGenerateExecutor reGenExecutor, OutputExecutor outputExecutor)
+    public static WorkflowBuilder GetWorkFlowWithExecutor(
+        DomainClassInfoExactExecutor exactExecutor = null,
+        DomainClassInfoReviewExecutor exactReviewExecutor = null,
+        DomainClassInfoReExactExecutor reExactExecutor = null, ObjectDataModelGenerateExecutor genExecutor = null,
+        ObjectDataModelReviewExecutor genReviewExecutor = null,
+        ObjectDataModelReGenerateExecutor reGenExecutor = null, OutputExecutor outputExecutor = null,
+        List<DomainClassInfo> domainClassInfos = null, ELanguage language = ELanguage.CSharp,
+        IApikeyConfiguration configuration = null)
     {
+        //不指定的执行器需要使用领域类信息与LLM配置构造默认的执行器 故这两项不可为空
+        if (domainClassInfos == null || domainClassInfos.Count == 0)
+            throw new ArgumentNullException(nameof(domainClassInfos), "领域类信息集合不可为空.");
+
+        if (configuration == null)
+            throw new ArgumentNullException(nameof(configuration), "LLM配置不可为空.");
+
+        //未指定的执行器使用默认的构造方法构造
+        exactExecutor ??= new DomainClassInfoExactExecutor(domainClassInfos, configuration);
+        exactReviewExecutor ??= new DomainClassInfoReviewExecutor(domainClassInfos, configuration);
+        reExactExecutor ??= new DomainClassInfoReExactExecutor();
+        genExecutor ??= new ObjectDataModelGenerateExecutor(domainClassInfos, configuration, language);
+        genReviewExecutor ??= new ObjectDataModelReviewExecutor(domainClassInfos, configuration, language);
+        reGenExecutor ??= new ObjectDataModelReGenerateExecutor();
+        outputExecutor ??= new OutputExecutor();
+
         //组合工作流
         //输入 → 抽取
         var workflowBuilder = new WorkflowBuilder(exactExecutor)
